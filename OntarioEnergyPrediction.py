@@ -9,7 +9,7 @@ from sklearn.preprocessing import StandardScaler
 # =========================
 # 1. LOAD AND ALIGN DATA
 # =========================
-df = pd.read_csv(r"C:\Users\deept\OneDrive\Desktop\ontario_electricity_demand.csv")
+df = pd.read_csv(r"ontario_electricity_demand.csv")
 
 df["date"] = pd.to_datetime(df["date"])
 df["timestamp"] = df["date"] + pd.to_timedelta(df["hour"] - 1, unit="h")
@@ -457,4 +457,5 @@ print(f"Expected simulated peak: {peak_demands.mean():.0f} kWh")
 print(f"\nP(Peak > 20,000): {np.mean(peak_demands > 20000):.3f}")
 print(f"P(Peak > 21,000): {np.mean(peak_demands > 21000):.3f}")
 print(f"\n95% CI for peak: [{np.percentile(peak_demands, 2.5):.0f}, "
+
       f"{np.percentile(peak_demands, 97.5):.0f}] kWh")
