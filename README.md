@@ -1,101 +1,121 @@
 # Ontario Electricity Demand Forecasting  
-**Probabilistic Forecasting, Uncertainty Quantification, and Risk Simulation**
+Probabilistic Forecasting, Uncertainty Quantification, and Risk Simulation
 
 ## Overview
-This project builds a **24-hour to 7-day ahead probabilistic forecasting system** for Ontario’s hourly electricity demand.  
-Beyond point forecasts, the model explicitly quantifies **uncertainty**, simulates future demand scenarios via **Monte Carlo methods**, and evaluates **system risk under peak-load stress events**.
+This project develops a **probabilistic forecasting system** for Ontario’s hourly electricity demand, with a focus on **uncertainty modeling and peak-load risk analysis** rather than point prediction alone.
 
-The focus is on **model interpretability, uncertainty calibration, and risk-aware decision support**, not black-box accuracy alone.
+The pipeline produces:
+- Interpretable demand forecasts
+- Calibrated prediction intervals
+- Monte Carlo demand scenarios
+- Quantitative risk metrics for extreme load events
+
+This mirrors real-world forecasting and risk workflows used in energy systems and quantitative modeling.
 
 ---
 
 ## Data
-- **Source:** Ontario hourly electricity demand and hourly average price
 - **Frequency:** Hourly
 - **Time span:** ~2003–2023
-- **Target:** Demand 24 hours ahead
+- **Target:** Electricity demand (kWh)
+- **Auxiliary variable:** Hourly average price
 
-### Data Processing
-- Time alignment to a complete hourly grid
-- Time-based interpolation for missing timestamps
-- Explicit integrity checks (no missing values post-processing)
+Data integrity checks ensure:
+- No missing timestamps
+- No missing target values after preprocessing
 
 ---
 
 ## Feature Engineering
-### Temporal Features
+
+### Temporal Structure
 - Hour of day (sin / cos encoding)
 - Day of week
 - Month
 - Day of year
 - Weekend indicator
 
-### Holiday Features (Ontario-specific)
-- Fixed holidays (New Year’s, Canada Day, Christmas, etc.)
-- Variable holidays (Family Day, Good Friday, Victoria Day, Labour Day, Thanksgiving)
+### Holiday Effects (Ontario-specific)
+- Fixed-date holidays
+- Variable holidays (e.g., Good Friday, Labour Day, Thanksgiving)
 
-### Lag & Rolling Statistics
+### Lagged & Rolling Features
 - Demand lags: 1h, 24h, 168h
-- Rolling mean & volatility (24h, 168h)
+- Rolling demand statistics: mean and volatility
 - Price lags and rolling statistics
 
 ---
 
-## Modeling Approach
+## Modeling
 
 ### Baseline
-- **Naive lag-24 forecast**
-- Serves as a strong seasonal benchmark
+- Naive 24-hour lag forecast  
+Used as a strong seasonal benchmark.
 
 ### Linear Regression
-- Deterministic point forecast
+- Deterministic reference model
 - High interpretability
-- Used as a reference model
+- Establishes baseline error levels
 
 ### Quantile Regression (Core Model)
-- Quantiles: **0.1, 0.5, 0.9**
-- Produces **prediction intervals**, not just point estimates
+- Quantiles: 0.1, 0.5, 0.9
+- Produces **prediction intervals**
 - Enables uncertainty-aware downstream analysis
 
-Performance is evaluated using:
+Evaluation metrics:
 - MAE
 - RMSE
 - Empirical interval coverage
 
 ---
 
-## Uncertainty & Risk Modeling
+## Uncertainty & Risk Analysis
 
 ### Monte Carlo Simulation
-- Forecast horizon: **7 days (168 hours)**
-- Simulations: **1000 paths**
-- Distribution inferred from quantile spread
+- Horizon: 7 days (168 hours)
+- Simulations: 1000
+- Quantile-derived uncertainty
 - Generates full demand trajectories
 
 ### Risk Metrics
 - Peak demand distribution
-- Probability of exceeding critical thresholds
+- Probability of exceeding system thresholds
 - Worst-case (top 1%) stress events
-- Daily peak load distributions
+- Daily peak load statistics
+
+All visual outputs are saved to the `/outputs` directory.
 
 ---
 
-## Results Summary
-- Quantile regression achieves ~**80% empirical coverage** for the 80% prediction interval
-- Demand is driven primarily by:
-  - Weekend effects
+## Results (High-Level)
+- Quantile model achieves ~80% empirical coverage for the 80% interval
+- Demand variability is driven primarily by:
   - Hour-of-day seasonality
+  - Weekend effects
   - Holiday structure
-- Monte Carlo simulations reveal **systematic upside peak risk**, even when median forecasts appear conservative
+- Simulated peak demand distributions reveal **material upside risk**, even when median forecasts appear conservative
 
 ---
 
-## Visualizations
-Key outputs are saved in `/outputs`:
-- **Fan chart:** probabilistic forecast bands
-- **Peak demand distribution**
-- **Daily peak stress analysis**
+## Limitations
+- No weather or temperature inputs
+- Linear conditional quantile assumption
+- Gaussian error assumption in simulation
+- No regime-switching or volatility clustering
 
-Example:
-```md
-![](outputs/fan_chart.png)
+These limitations are **explicit modeling tradeoffs**, not oversights.
+
+---
+
+## Future Extensions
+- Weather-driven demand modeling
+- Nonlinear quantile models (GBDT / trees)
+- Regime-dependent volatility
+- Scenario-conditioned stress testing
+
+---
+
+## How to Run
+```bash
+pip install -r requirements.txt
+python OntarioEnergyPrediction.py
